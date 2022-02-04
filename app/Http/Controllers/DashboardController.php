@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use App\Models\User;
+use App\Notifications\ReportNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
@@ -210,6 +212,22 @@ class DashboardController extends Controller
         }
         Report::destroy($data->id);
         return redirect('/table');
+    }
+
+    public function reminderPrj()
+    {
+       $user = User::first();
+
+       $data = [
+            'greeting' => 'Hello, '.$user->name,'!',
+            'body' => 'This email is to remind you that you have finish your PRJ before due date',
+            'regards' => 'Thank you, have a nice day!',
+            'actionText' => 'View PRJ',
+            'actionUrl' => url('/table')
+       ];
+
+       Notification::send($user, new ReportNotification($data));
+       return redirect('/table')->with('success','Reminder Send');
     }
 
 }

@@ -19,6 +19,7 @@ Route::get('/table', [DashboardController::class, 'tableview'])->middleware('aut
 Route::get('/create-report', [DashboardController::class, 'create'])->middleware('auth');
 Route::get('/report/{data:id}/edit', [DashboardController::class, 'edit'])->middleware('auth');
 Route::get('/report/delete/{data:id}', [DashboardController::class, 'destroy'])->middleware('auth');
+Route::get('/report/send', [DashboardController::class, 'reminderPrj'])->middleware('auth');
 Route::post('/create-report/store', [DashboardController::class, 'store']);
 Route::put('/report/update/{data:id}', [DashboardController::class, 'update']);
 
