@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use App\Notifications\ReportNotification;
+
 
 class User extends Authenticatable 
 {
@@ -77,7 +77,5 @@ class User extends Authenticatable
     {
         return $this->hasMany(TermOfPayment::class);
     }
-
-    
 
 }

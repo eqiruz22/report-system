@@ -44,7 +44,8 @@ class ReportNotification extends Notification
                     ->greeting($this->remindPrj['greeting'])
                     ->line($this->remindPrj['body'])
                     ->action($this->remindPrj['actionText'], $this->remindPrj['actionUrl'])
-                    ->line($this->remindPrj['regards']);
+                    ->line($this->remindPrj['regards'])
+                    ->line($this->remindPrj['thanks']);
     }
 
     /**

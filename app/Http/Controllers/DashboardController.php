@@ -49,7 +49,7 @@ class DashboardController extends Controller
        $rule = Validator::make($request->all(), [
         'user_id' => 'required',
         'prj' => 'required|unique:reports',
-        'file_ho' => ['mimes:pdf,csv,xls,xlsx,doc,docx','max:5024'],
+        'file_ho' => 'nullable|mimes:pdf,csv,xls,xlsx,doc,docx|max:5024',
         'project_title' => 'required',
         'quantity' => 'required',
         'po_number' => 'required|unique:reports',
@@ -77,6 +77,7 @@ class DashboardController extends Controller
         'costumer.required' => 'Costumer cannot be empty!',
         'project_type.required' => 'Project Type cannot be empty!',
         'date_of_po.required' => 'Date Of Po cannot be empty!',
+        'due_date.required' => 'Due Date cannot be empty!',
         'project_value.required' => 'Project Value cannot be empty!',
         'remaining_reimbusment_fee.required' => 'Reimbusment cannot be empty!',
         'gross_margin.required' => 'Gross Margin cannot be empty!',
@@ -143,7 +144,7 @@ class DashboardController extends Controller
     {
         $rule = [
         'user_id' => 'required',
-        'file_ho' => ['nullable','mimes:pdf,csv,xls,xlsx,doc,docx','max:5024'],
+        'file_ho' => 'nullable|mimes:pdf,csv,xls,xlsx,doc,docx|max:5024',
         'project_title' => 'required',
         'quantity' => 'required',
         'costumer' => 'required',
@@ -171,6 +172,14 @@ class DashboardController extends Controller
             ];
         }
 
+        if($request->file('file_ho')){
+            if($request->oldHo){
+                Storage::delete('docs-store-ho/'.$request->oldHo);
+            }
+            $filename = $request->file('file_ho')->getClientOriginalName();
+            $validate['file_ho'] = $request->file('file_ho')->storeAs('docs-store-ho',$filename);
+        }
+
         $validate = $request->validate($rule,[
             'file_ho.mimes' => 'Document HO must be this valid extension pdf,csv,xls,xlsx,doc,docx',
             'file_ho.max' => 'Document HO maximum upload is 5MB',
@@ -193,13 +202,7 @@ class DashboardController extends Controller
             'pmo_cost.required' => 'PMO Cost is required',
             'opex.required' => 'Opex is required'
         ]);
-        if($request->file('file_ho')){
-            if($request->oldHo){
-                Storage::delete('docs-store-ho/'.$request->oldHo);
-            }
-            $filename = $request->file('file_ho')->getClientOriginalName();
-            $validate['file_ho'] = $request->file('file_ho')->storeAs('docs-store-ho',$filename);
-        }
+        
         $result = str_replace([".","docs-store-ho/"], "", $validate);
         Report::where('id',$data->id)->update($result);
         return redirect('/table')->with('success','Update Data success');
@@ -216,15 +219,19 @@ class DashboardController extends Controller
 
     public function reminderPrj()
     {
-       $user = User::first();
+       $user = User::all();
 
-       $data = [
-            'greeting' => 'Hello, '.$user->name,'!',
-            'body' => 'This email is to remind you that you have finish your PRJ before due date',
-            'regards' => 'Thank you, have a nice day!',
-            'actionText' => 'View PRJ',
-            'actionUrl' => url('/table')
-       ];
+       foreach($user as $users){
+
+           $data = [
+                'greeting' => 'Hello, '.$users->name.'!',
+                'body' => 'This email is to remind you that you have finish your PRJ before due date',
+                'regards' => 'Thank you...',
+                'thanks' => 'have a nice day!',
+                'actionText' => 'View PRJ',
+                'actionUrl' => url('/table')
+           ];
+       }
 
        Notification::send($user, new ReportNotification($data));
        return redirect('/table')->with('success','Reminder Send');
